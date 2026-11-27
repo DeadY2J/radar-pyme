@@ -110,7 +110,7 @@ describe("español neutro", () => {
 
   it("todas las plantillas de la configuración están en español neutro", () => {
     for (const s of sectores) {
-      for (const linea of s.guion.filter((l) => l.de === "asistente")) expect(buscarModismos(linea.texto), linea.texto).toEqual([]);
+      for (const linea of s.guion) expect(buscarModismos(linea.texto), linea.texto).toEqual([]);
       for (const serv of s.servicios) expect(esNeutro(serv.nombre), serv.nombre).toBe(true);
     }
   });
