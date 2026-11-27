@@ -1,8 +1,16 @@
+import { modoDemo } from "@/radar/busqueda";
+import { ciudades, limites, sectores } from "@/radar/config";
+import { Radar } from "./radar";
+
+export const dynamic = "force-dynamic";
+
 export default function Inicio() {
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-3xl font-bold text-bosque">Radar Pyme</h1>
-      <p className="mt-2 text-tinta-suave">En construcción: el motor de puntuación ya está listo; la interfaz llega en la siguiente parte.</p>
-    </main>
+    <Radar
+      modoDemo={modoDemo()}
+      sectores={sectores.map((s) => ({ id: s.id, nombre: s.nombre }))}
+      ciudades={ciudades.map((c) => ({ id: c.id, nombre: c.nombre }))}
+      topeDiario={limites.maxContactosPorDia}
+    />
   );
 }

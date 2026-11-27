@@ -13,6 +13,8 @@ const ordenSemana: DiaSemana[] = [1, 2, 3, 4, 5, 6, 0];
 
 export type DemoPersonalizada = {
   prospectoId: string;
+  /** true si el negocio es ficticio (modo demo). */
+  ficticio: boolean;
   negocio: { nombre: string; ciudad: string; direccion: string };
   sector: string;
   producto: Pick<Producto, "nombre" | "promesa">;
@@ -82,6 +84,7 @@ export function crearDemo(p: Prospecto): DemoPersonalizada {
 
   return {
     prospectoId: p.id,
+    ficticio: p.negocio.fuente === "demo",
     negocio: { nombre: p.negocio.nombre, ciudad: p.negocio.ciudad, direccion: p.negocio.direccion },
     sector: sector.nombre,
     producto: { nombre: producto.nombre, promesa: producto.promesa },

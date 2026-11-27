@@ -27,10 +27,14 @@ export class Almacen {
 
   constructor(private readonly topeDiario: number = limites.maxContactosPorDia) {}
 
-  /** Guarda o actualiza. Un mismo negocio conserva su id (y su enlace de demo). */
+  /**
+   * Guarda o actualiza. Un mismo negocio conserva su id (y su enlace de demo).
+   * Los negocios reales reciben un UUID aleatorio; los ficticios del modo demo usan
+   * su propio id, así la demo se puede reconstruir aunque el servidor se reinicie.
+   */
   guardar(p: Omit<Prospecto, "id">): Prospecto {
     const existente = this.porNegocio.get(p.negocio.id);
-    const id = existente ?? crypto.randomUUID();
+    const id = existente ?? (p.negocio.fuente === "demo" ? p.negocio.id : crypto.randomUUID());
     const prospecto: Prospecto = { ...p, id };
     this.prospectos.set(id, prospecto);
     this.porNegocio.set(p.negocio.id, id);
