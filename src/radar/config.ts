@@ -106,7 +106,7 @@ const semana = (abre: string, cierra: string, sabado?: Franja[]): Partial<Record
 const guionCitas: Sector["guion"] = [
   { de: "cliente", texto: "Hola, ¿tienen lugar para {servicio} esta semana?" },
   { de: "asistente", texto: "¡Hola! Soy {asistente}, la asistente de {negocio}. Para {servicio} tengo disponible el {dia} a las {hora}. ¿Te la reservo?" },
-  { de: "cliente", texto: "Sí, dale" },
+  { de: "cliente", texto: "Sí, por favor" },
   { de: "asistente", texto: "Listo, tu cita quedó reservada para el {dia} a las {hora}. Te enviaré un recordatorio el día anterior." },
 ];
 
@@ -174,7 +174,7 @@ export const sectores: Sector[] = [
     horariosTipicos: semana("07:00", "22:00", [{ abre: "09:00", cierra: "14:00" }]),
     nombresDemo: ["Gimnasio {barrio}", "Fuerza {apellido}", "Club Atlético Impulso", "Funcional {barrio}", "Box {apellido}", "Energía Gym", "Entrena {barrio}", "Centro Deportivo {apellido}"],
     guion: [
-      { de: "cliente", texto: "Hola, ¿cuánto sale el mes y puedo ir a probar?" },
+      { de: "cliente", texto: "Hola, ¿cuánto cuesta el mes y puedo ir a probar?" },
       { de: "asistente", texto: "¡Hola! Soy {asistente}, de {negocio}. Puedes venir a una {servicio} gratis. Tengo lugar el {dia} a las {hora}. ¿Te anoto?" },
       { de: "cliente", texto: "Sí, anótame" },
       { de: "asistente", texto: "Listo. Te envío tu QR de acceso para el {dia} a las {hora}. Si te gusta, te paso el link para pagar la cuota en línea." },

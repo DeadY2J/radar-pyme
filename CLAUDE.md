@@ -13,6 +13,11 @@ cada uno una demo personalizada y un mensaje de WhatsApp uno a uno. Alcance en `
 - `src/radar/config.ts`: lo ÚNICO que cambia para adaptar la prospección (sectores, ciudades, pesos, límites, firma).
 - `src/radar/puntuacion.ts`: motor de puntuación puro y testeable. Nunca inventa datos: lo que no se sabe es "sin datos".
 - `src/radar/neutro.ts`: detector de voseo y modismos; los tests lo pasan sobre todas las plantillas.
+- `src/radar/fuentes/`: `demo.ts` (negocios ficticios deterministas, webs `.example`) y `places.ts` (Google Places API New).
+- `src/radar/busqueda.ts`: elige fuente, puntúa, guarda y ordena. `almacen.ts`: en memoria, con las reglas de contacto
+  (una vez por negocio, tope diario, lista de no contactar). Para producción se sustituye por Supabase.
+- `src/radar/demo-personalizada.ts`, `mensaje.ts`: la demo por negocio y el mensaje de WhatsApp (plantillas, sin IA).
+- `src/radar/presupuesto.ts`: `EntradaPresupuesto`, la salida tipada hacia el presupuesto en PDF (fase 5). Sin precios.
 - `src/app/`: interfaz y rutas API.
 
 ## Convenciones
