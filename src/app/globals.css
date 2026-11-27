@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* Paleta de la Fábrica (compartida con Recepción 24/7): papel, bosque y jacarandá. */
+@theme {
+  --color-papel: #f5f6f2;
+  --color-tinta: #18221e;
+  --color-tinta-suave: #4b5a53;
+  --color-bosque: #1e4a3b;
+  --color-bosque-claro: #2f6b55;
+  --color-salvia: #dce7df;
+  --color-salvia-borde: #c3d3c8;
+  --color-jacaranda: #7b5cc4;
+  --color-jacaranda-claro: #ece6fa;
+  --color-burbuja: #d9f3d0;
+  --color-alerta: #a8431f;
+  --color-ambar: #9a6a00;
+  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+}
+
+html { background: var(--color-papel); color: var(--color-tinta); }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+h1, h2 { font-variation-settings: "opsz" 48; }
+
+:focus-visible { outline: 2px solid var(--color-jacaranda); outline-offset: 2px; border-radius: 4px; }
+
+.cifra { font-family: var(--font-cifras), var(--font-bricolage), sans-serif; font-variation-settings: "wdth" 75; font-feature-settings: "tnum"; letter-spacing: -0.02em; }
+
+.fondo-chat {
+  background-color: var(--color-salvia);
+  background-image: radial-gradient(rgb(30 74 59 / 0.07) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+/* El momento animado: el barrido del radar mientras busca. */
+@keyframes barrido { to { transform: rotate(360deg); } }
+.barrido { animation: barrido 1.4s linear infinite; transform-origin: 50% 50%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .barrido { animation: none; }
+}
