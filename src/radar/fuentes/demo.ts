@@ -109,3 +109,16 @@ export function negociosDemo(sector: Sector, ciudad: Ciudad, cantidad = 8): Nego
     } satisfies Negocio;
   });
 }
+
+/** Reconstruye un negocio ficticio a partir de su id (para servir su demo sin almacén). */
+export function negocioDemoPorId(id: string, sectores: Sector[], ciudades: Ciudad[]): Negocio | undefined {
+  if (!id.startsWith("demo-")) return undefined;
+  for (const s of sectores) {
+    if (!id.startsWith(`demo-${s.id}-`)) continue;
+    for (const c of ciudades) {
+      if (!id.startsWith(`demo-${s.id}-${c.id}-`)) continue;
+      return negociosDemo(s, c).find((n) => n.id === id);
+    }
+  }
+  return undefined;
+}

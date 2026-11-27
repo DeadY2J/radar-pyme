@@ -18,7 +18,8 @@ cada uno una demo personalizada y un mensaje de WhatsApp uno a uno. Alcance en `
   (una vez por negocio, tope diario, lista de no contactar). Para producción se sustituye por Supabase.
 - `src/radar/demo-personalizada.ts`, `mensaje.ts`: la demo por negocio y el mensaje de WhatsApp (plantillas, sin IA).
 - `src/radar/presupuesto.ts`: `EntradaPresupuesto`, la salida tipada hacia el presupuesto en PDF (fase 5). Sin precios.
-- `src/app/`: interfaz y rutas API.
+- `src/radar/seguridad.ts`: clave de acceso en modo real (RADAR_TOKEN), límite de peticiones, origen público.
+- `src/app/`: interfaz (`radar.tsx`), demo por negocio (`demo/[id]`) y rutas API (`api/buscar`, `api/prospectos/[id]/…`).
 
 ## Convenciones
 - Código y comentarios en español. Todos los textos visibles (interfaz, demos, mensajes) en español latinoamericano

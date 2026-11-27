@@ -19,13 +19,13 @@ function prospecto(n: Partial<Negocio> = {}, id = "p1"): Prospecto {
 }
 
 describe("búsqueda", () => {
-  it("en modo demo devuelve prospectos ordenados y guardados con id impredecible", async () => {
+  it("en modo demo devuelve prospectos ordenados y guardados", async () => {
     const almacen = new Almacen();
     const ps = await buscar("fisioterapia", "buenos-aires", { almacen });
     expect(ps).toHaveLength(8);
     expect(ps[0].puntuacion.total).toBeGreaterThanOrEqual(ps[1].puntuacion.total);
     expect(ps.at(-1)!.puntuacion.contactable).toBe(false);
-    expect(ps[0].id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(ps[0].id).toBe(ps[0].negocio.id);
     expect(almacen.obtener(ps[0].id)).toEqual(ps[0]);
   });
 
@@ -40,6 +40,8 @@ describe("búsqueda", () => {
     const fuente: Fuente = async () => [{ ...negociosDemo(fisio, ba)[0], id: "google-X", fuente: "google" }];
     const ps = await buscar("fisioterapia", "buenos-aires", { almacen: new Almacen(), fuente });
     expect(ps[0].negocio.fuente).toBe("google");
+    // Los negocios reales llevan un id aleatorio e impredecible en el enlace de la demo.
+    expect(ps[0].id).toMatch(/^[0-9a-f-]{36}$/);
     await expect(buscar("ovnis", "buenos-aires", { almacen: new Almacen() })).rejects.toThrow();
   });
 });
