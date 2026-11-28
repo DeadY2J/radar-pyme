@@ -2,6 +2,16 @@
 
 Revisión del 27/11/2026.
 
+## Rediseño visual (28/11/2026, PR de prioridad 1)
+- Portada nueva con identidad propia: un sonar barre el plano ilustrativo del barrio y cada negocio aparece como un
+  punto cuando el haz pasa por encima; su color y tamaño indican la oportunidad (ámbar = alta). Fondo de noche con ámbar.
+- Tipografías locales (OFL): Oxanium para cifras y títulos, Instrument Sans para el texto. Sin servicios externos.
+- Los puntos son botones con nombre y puntuación para lector de pantalla; foco visible en ámbar; con
+  `prefers-reduced-motion` el haz queda quieto y los puntos aparecen sin animación.
+- El plano es solo presentación (`src/app/plano.ts`, con test): coloca cada negocio en su barrio, no en su dirección exacta.
+- Comprobado: typecheck, 58 tests, build, axe sin incidencias tras una búsqueda y sin desbordamiento a 375 px.
+- La demo por negocio (`/demo/[id]`) mantiene su diseño: es la página del cliente, no la herramienta.
+
 ## Revisión del 28/11/2026 (auditoría fase 4)
 - CSP completa con nonce por petición (`src/proxy.ts`), verificada en navegador sin errores.
 - Typecheck, 56 tests, build y `npm audit` (0 vulnerabilidades) en verde; axe sin incidencias en la vista inicial; sin desbordamiento a 375 px.

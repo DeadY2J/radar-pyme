@@ -9,7 +9,7 @@ export default function Inicio() {
     <Radar
       modoDemo={modoDemo()}
       sectores={sectores.map((s) => ({ id: s.id, nombre: s.nombre }))}
-      ciudades={ciudades.map((c) => ({ id: c.id, nombre: c.nombre }))}
+      ciudades={ciudades.map((c) => ({ id: c.id, nombre: c.nombre, barrios: c.barrios }))}
       topeDiario={limites.maxContactosPorDia}
     />
   );
