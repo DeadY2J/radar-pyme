@@ -4,7 +4,8 @@ import { nuevoNonce, politicaCSP } from "@/radar/csp";
 /** Pone la CSP con nonce en cada página. Las rutas API y los estáticos no la necesitan. */
 export function proxy(request: NextRequest) {
   const nonce = nuevoNonce();
-  const csp = politicaCSP(nonce, process.env.NODE_ENV === "development");
+  const enmarcable = request.nextUrl.pathname.startsWith("/demo/");
+  const csp = politicaCSP(nonce, process.env.NODE_ENV === "development", { enmarcable });
   const cabeceras = new Headers(request.headers);
   cabeceras.set("x-nonce", nonce);
   cabeceras.set("Content-Security-Policy", csp);
