@@ -21,7 +21,7 @@ una prueba con clave real antes de usarla con clientes.
 | S4 | Media | Filtrado de la clave de Google en errores o en la URL. | **Corregido**: la clave va en cabecera, solo en el servidor; los errores no propagan el cuerpo de Google. Tests con `fetch` simulado (403, caída de red, respuesta inválida) y verificado que la clave no aparece en los logs del servidor. |
 | S5 | Media | Enumeración de prospectos reales por su id. | **Corregido**: los negocios reales llevan un UUID aleatorio; los ficticios usan su id legible (no hay datos reales) y solo se reconstruyen en modo demo. Test incluido. |
 | S6 | Media | Uso del nombre de un negocio real en su demo (suplantación). | **Mitigado**: banner fijo "Propuesta de demostración… No es el sitio oficial", sin logos ni fotos del negocio, `noindex`. |
-| S7 | Media | CSP completa (script-src/style-src) no aplicada: Next.js necesita nonces para scripts en línea. | Abierto, igual que en Recepción 24/7. Pendiente antes de producción. |
+| S7 | Media | CSP completa (script-src/style-src) no aplicada: Next.js necesita nonces para scripts en línea. | **Corregido (28/11/2026)**: CSP completa con nonce por petición en `src/proxy.ts` (ver sección de revisión). |
 | S8 | Baja | Límite de peticiones y almacén en memoria: con varias instancias (Vercel) no se comparten; el contador diario y la lista de no contactar se pierden al reiniciar. | Abierto. Fase 2: Supabase y límite compartido (Upstash/Redis). **No usar en producción real sin persistir la lista de no contactar.** |
 | S9 | Baja | `x-forwarded-for` se puede falsear fuera de Vercel para esquivar el límite por IP. | Aceptado (en Vercel lo fija la plataforma). En modo real además hace falta `RADAR_TOKEN`. |
 | S10 | Baja | La clave de acceso se guarda en `sessionStorage` del navegador. | Aceptado: se borra al cerrar la pestaña. Mejora futura: sesión con cookie `HttpOnly`. |
@@ -52,3 +52,33 @@ Comprobado sin hallazgos:
 1. Probar con una `GOOGLE_PLACES_API_KEY` real (restringida a Places API New) y revisar el coste por búsqueda.
 2. Persistir contactos y la lista de no contactar (Supabase).
 3. Revisar la normativa de protección de datos del país de destino antes de escribir.
+
+## Revisión del 28/11/2026 (fase 4 completa)
+
+Pasada de auditoría sobre `main` de las seis apps de la Fábrica, en la nube. Resultado: **sin críticos, altos ni medios
+abiertos que se puedan corregir sin cuentas reales**. Lo que depende de cuentas reales queda pendiente y no se da por bueno.
+
+Corregido en esta pasada:
+- **CSP completa** (S7): `src/proxy.ts` genera un nonce por petición y aplica `default-src 'self'; script-src 'self' 'nonce-…' 'strict-dynamic'`
+  (sin `unsafe-inline` ni `unsafe-eval` en producción), `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`
+  y `upgrade-insecure-requests`. `style-src` mantiene `'unsafe-inline'` porque React usa atributos `style` (riesgo bajo). Las páginas
+  pasan a render dinámico (`connection()` en el layout) para que el nonce sea nuevo en cada visita. Las rutas API llevan
+  `frame-ancestors 'none'; object-src 'none'; base-uri 'none'`. Política en `src/*/csp.ts` con test (`tests/csp.test.ts`).
+
+Comprobado (todo contra `next build` + `next start`, Chromium sin cabeza):
+
+| Comprobación | Resultado |
+|---|---|
+| Typecheck · tests · build | OK · 56 tests en verde · OK |
+| `npm audit` | 0 vulnerabilidades |
+| CSP en navegador | Cabecera con nonce en la página; scripts de Next con nonce; React hidrata y responde a clics; 0 errores en consola |
+| Accesibilidad (axe-core 4.10, WCAG 2 A/AA, vista inicial) | 0 incidencias |
+| Móvil (375 px) | Sin desbordamiento horizontal |
+| Rendimiento (Pixel 5 emulado, CPU ×4, red lenta) | LCP 0,6 s · CLS 0 · TTFB ≈ 150 ms (local) |
+| Voseo y modismos | Ninguno fuera de los tests de modismos y de los patrones que sirven para entender al usuario |
+| Documentos de la Fábrica | ALCANCE, AUDITORIA, PRESUPUESTO (marcadores `[TARIFA_HORA_USD]` y `[CUOTA_MENSUAL_USD]` sin rellenar), PROSPECCION y STATUS presentes |
+
+Límites honestos de esta pasada: axe solo cubre la vista inicial (no todos los estados), el rendimiento se midió en local
+(no en Vercel ni con Lighthouse) y no hubo prueba en móviles físicos.
+
+**Pendiente que no se puede dar por bueno sin cuentas reales:** Google Places con `GOOGLE_PLACES_API_KEY` y `RADAR_TOKEN` reales (Jorge aún no tiene la clave), y persistir la lista de no contactar (Supabase).
