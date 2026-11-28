@@ -2,6 +2,11 @@
 
 Revisión del 27/11/2026.
 
+## Test de humo (28/11/2026, PR de prioridad 4)
+- `npm run test:humo` (Playwright): compila, arranca en modo demo y comprueba búsqueda, puntos del radar, ficha, demo por
+  negocio y modo presentación, sin errores de consola. 3 tests en verde. No va en la CI (necesita navegador instalado):
+  en local, `npx playwright install chromium` la primera vez.
+
 ## Modo presentación (28/11/2026, PR de prioridad 2)
 - Botón **Modo presentación** (solo en modo demo): reproduce el guion de 60 s de `PROSPECCION.md` con la búsqueda
   precargada (fisioterapia en Buenos Aires), subtítulos con la voz en off, resaltado de cada paso, la demo del negocio en
@@ -48,4 +53,5 @@ Revisión del 27/11/2026.
 npm ci
 npm run dev        # http://localhost:3000, modo demo sin claves
 npm test && npm run typecheck && npm run build
+npm run test:humo  # test de humo con Playwright
 ```
