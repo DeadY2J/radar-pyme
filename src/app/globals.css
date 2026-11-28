@@ -113,3 +113,8 @@ h1, h2 { font-variation-settings: "opsz" 48; }
   .eco, .eco::after { animation: none; }
   .eco-punto { transition: none; }
 }
+
+/* Modo presentación: lo que está contando la voz en off. */
+.foco-guion { outline: 2px solid var(--color-ambar-vivo); outline-offset: 8px; border-radius: 6px; animation: latido 1.6s ease-in-out infinite; }
+@keyframes latido { 50% { outline-color: rgb(245 165 36 / 0.35); } }
+@media (prefers-reduced-motion: reduce) { .foco-guion { animation: none; } }

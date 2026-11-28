@@ -2,6 +2,15 @@
 
 Revisión del 27/11/2026.
 
+## Modo presentación (28/11/2026, PR de prioridad 2)
+- Botón **Modo presentación** (solo en modo demo): reproduce el guion de 60 s de `PROSPECCION.md` con la búsqueda
+  precargada (fisioterapia en Buenos Aires), subtítulos con la voz en off, resaltado de cada paso, la demo del negocio en
+  un marco, el «Marcar como enviado» y la descarga de los datos del presupuesto. **Reiniciar** lo repite desde cero.
+- `POST /api/demo/reiniciar` vacía el almacén para repetir el guion; fuera del modo demo responde 404.
+- La demo por negocio (`/demo/…`) admite marcos solo del propio origen (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`);
+  el resto de páginas sigue con `'none'`/`DENY`.
+- Comprobado: typecheck, 65 tests, build; recorrido completo con Playwright sin errores y axe sin incidencias.
+
 ## Rediseño visual (28/11/2026, PR de prioridad 1)
 - Portada nueva con identidad propia: un sonar barre el plano ilustrativo del barrio y cada negocio aparece como un
   punto cuando el haz pasa por encima; su color y tamaño indican la oportunidad (ámbar = alta). Fondo de noche con ámbar.

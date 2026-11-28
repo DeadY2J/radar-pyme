@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { POST as buscar } from "@/app/api/buscar/route";
 import { POST as contacto } from "@/app/api/prospectos/[id]/contacto/route";
 import { GET as presupuesto } from "@/app/api/prospectos/[id]/presupuesto/route";
+import { POST as reiniciar } from "@/app/api/demo/reiniciar/route";
 import { almacen } from "@/radar/almacen";
 import { comprobarAcceso, limitar, reiniciarLimites } from "@/radar/seguridad";
 import { prospectoPorId } from "@/radar/vista";
@@ -96,6 +97,24 @@ describe("API con Google Places activado", () => {
   it("no reconstruye demos ficticias fuera del modo demo", async () => {
     process.env.GOOGLE_PLACES_API_KEY = "clave";
     expect(prospectoPorId("demo-gimnasio-lima-loquesea")).toBeUndefined();
+  });
+});
+
+describe("reinicio del modo presentación", () => {
+  const pedirReinicio = () => new Request("http://localhost:3000/api/demo/reiniciar", { method: "POST", headers: { "x-forwarded-for": "1.2.3.4" } });
+
+  it("en modo demo borra los contactos para repetir el guion", async () => {
+    const datos = await (await buscar(pedir({ sector: "fisioterapia", ciudad: "buenos-aires" }))).json();
+    const id = datos.prospectos[0].id;
+    expect((await contacto(new Request("http://localhost/x", { method: "POST", body: JSON.stringify({ accion: "enviado" }) }), params(id))).status).toBe(200);
+    const res = await reiniciar(pedirReinicio());
+    expect(res.status).toBe(200);
+    expect((await res.json()).contactos.hoy).toBe(0);
+  });
+
+  it("fuera del modo demo no existe", async () => {
+    process.env.GOOGLE_PLACES_API_KEY = "clave";
+    expect((await reiniciar(pedirReinicio())).status).toBe(404);
   });
 });
 

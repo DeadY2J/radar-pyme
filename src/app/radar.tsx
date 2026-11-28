@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { VistaProspecto } from "@/radar/vista";
 import type { Nivel } from "@/radar/tipos";
+import { busquedaGuion, DURACION, escenaEn, escenas, type Foco } from "./presentacion";
 import { anclasDeBarrios, barrioDe, posicionNegocio, RADIO, trazado } from "./plano";
 
 type Opcion = { id: string; nombre: string };
@@ -43,22 +44,73 @@ export function Radar(props: { modoDemo: boolean; sectores: Opcion[]; ciudades: 
 
   useEffect(() => setToken(leerToken()), []);
 
+  // Modo presentación: reproduce el guion de 60 s de PROSPECCION.md con la búsqueda precargada.
+  const [segundo, setSegundo] = useState<number | null>(null);
+  const [verDemo, setVerDemo] = useState(false);
+  const [arranque, setArranque] = useState(0);
+  const acciones = useRef({ buscar, contacto, descargarPresupuesto, lista, elegido });
+  acciones.current = { buscar, contacto, descargarPresupuesto, lista, elegido };
+  const enPresentacion = segundo !== null && segundo < DURACION;
+  const foco: Foco | null = enPresentacion ? escenaEn(segundo).foco : null;
+
+  async function iniciarPresentacion() {
+    setVerDemo(false);
+    setLista(null);
+    setError(null);
+    const res = await fetch("/api/demo/reiniciar", { method: "POST" });
+    if (!res.ok) return setError("No se pudo preparar la presentación. Espera un momento y vuelve a intentarlo.");
+    setContactos((await res.json()).contactos);
+    setSector(busquedaGuion.sector);
+    setCiudad(busquedaGuion.ciudad);
+    setSegundo(0);
+    setArranque((n) => n + 1);
+  }
+
+  function detenerPresentacion() {
+    setSegundo(null);
+    setVerDemo(false);
+  }
+
+  useEffect(() => {
+    if (segundo === null) return;
+    const inicio = Date.now() - segundo * 1000;
+    const reloj = setInterval(() => setSegundo(Math.min(DURACION, (Date.now() - inicio) / 1000)), 250);
+    const a = () => acciones.current;
+    const primero = () => a().lista?.[0];
+    const pasos: [number, () => void][] = [
+      [1.2, () => void a().buscar(undefined, busquedaGuion)],
+      [escenas[2].desde, () => setVerDemo(true)],
+      [escenas[3].desde, () => setVerDemo(false)],
+      [45, () => { const p = primero(); if (p) void a().contacto(p.id, "enviado"); }],
+      [55, () => { const p = primero(); if (p) void a().descargarPresupuesto(p); }],
+    ];
+    const timers = pasos.filter(([t]) => t > segundo).map(([t, f]) => setTimeout(f, (t - segundo) * 1000));
+    return () => { clearInterval(reloj); timers.forEach(clearTimeout); };
+    // Se programa una sola vez por arranque; el reloj avanza por su cuenta.
+  }, [arranque, segundo === null]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!foco || foco === "busqueda" || foco === "demo") return;
+    document.getElementById(`foco-${foco}`)?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }, [foco]);
+
   const cabeceras = (): HeadersInit => ({ "Content-Type": "application/json", ...(token ? { "x-radar-token": token } : {}) });
 
-  async function buscar(e?: React.FormEvent) {
+  async function buscar(e?: React.FormEvent, guion?: { sector: string; ciudad: string }) {
     e?.preventDefault();
+    const pedido = guion ?? { sector, ciudad };
     setCargando(true);
     setError(null);
     try {
       try { sessionStorage.setItem("radar-token", token); } catch { /* sin almacenamiento: no pasa nada */ }
       const [res] = await Promise.all([
-        fetch("/api/buscar", { method: "POST", headers: cabeceras(), body: JSON.stringify({ sector, ciudad }) }),
+        fetch("/api/buscar", { method: "POST", headers: cabeceras(), body: JSON.stringify(pedido) }),
         new Promise((r) => setTimeout(r, 1100)), // deja ver el barrido rápido del radar
       ]);
       const datos = await res.json();
       if (!res.ok) throw new Error(datos.error ?? "Error en la búsqueda");
       setLista(datos.prospectos);
-      setCiudadLista(ciudad);
+      setCiudadLista(pedido.ciudad);
       setRonda((r) => r + 1);
       setContactos(datos.contactos);
       setElegido(datos.prospectos[0]?.id ?? null);
@@ -120,6 +172,11 @@ export function Radar(props: { modoDemo: boolean; sectores: Opcion[]; ciudades: 
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm">
+            {props.modoDemo && (
+              <button type="button" onClick={enPresentacion ? detenerPresentacion : iniciarPresentacion} className="instrumento rounded-md border border-hueso px-3 py-1 font-semibold hover:bg-hueso hover:text-noche">
+                {enPresentacion ? "Detener presentación" : "Modo presentación"}
+              </button>
+            )}
             {props.modoDemo && <span className="rounded border border-ambar-hondo px-2.5 py-1 text-ambar-vivo">Modo demo: negocios ficticios</span>}
             <span className="text-niebla">
               Mensajes de hoy <span className="instrumento ml-1 text-base font-semibold text-hueso">{contactos.hoy}/{contactos.tope}</span>
@@ -128,7 +185,7 @@ export function Radar(props: { modoDemo: boolean; sectores: Opcion[]; ciudades: 
         </header>
 
         <main>
-        <form onSubmit={buscar} className="mt-5 flex flex-wrap items-end gap-3">
+        <form onSubmit={buscar} className={`mt-5 flex flex-wrap items-end gap-3 ${foco === "busqueda" ? "foco-guion" : ""}`}>
           <label className="flex min-w-44 flex-1 flex-col gap-1 text-sm text-niebla sm:flex-none">
             Sector
             <select value={sector} onChange={(e) => setSector(e.target.value)} className="control">
@@ -197,6 +254,7 @@ export function Radar(props: { modoDemo: boolean; sectores: Opcion[]; ciudades: 
                 onCopiar={copiar}
                 onContacto={contacto}
                 onPresupuesto={descargarPresupuesto}
+                foco={foco}
               />
             )}
 
@@ -238,6 +296,36 @@ export function Radar(props: { modoDemo: boolean; sectores: Opcion[]; ciudades: 
         </div>
         </main>
       </div>
+
+      {verDemo && actual && (
+        <div role="dialog" aria-modal="false" aria-label={`Demo de ${actual.negocio.nombre}`} className="fixed inset-x-3 top-3 bottom-28 z-20 flex flex-col overflow-hidden rounded-lg border border-ambar-hondo bg-noche shadow-2xl sm:inset-x-[8%]">
+          <div className="flex items-center justify-between gap-3 border-b border-calle px-4 py-2 text-sm">
+            <span className="truncate text-niebla">Demo de <span className="text-hueso">{actual.negocio.nombre}</span></span>
+            <button type="button" onClick={() => setVerDemo(false)} className="rounded px-2 py-1 hover:bg-manzana">Cerrar</button>
+          </div>
+          <iframe title={`Demo de ${actual.negocio.nombre}`} src={new URL(actual.urlDemo).pathname} className="h-full w-full bg-white" />
+        </div>
+      )}
+
+      {segundo !== null && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ambar-hondo bg-noche/95 px-4 py-3 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2">
+            <p className="instrumento w-14 text-lg text-ambar-vivo" aria-hidden>
+              0:{String(Math.floor(segundo)).padStart(2, "0")}
+            </p>
+            <p aria-live="polite" className="min-w-0 flex-1 text-base sm:text-lg">
+              {enPresentacion ? escenaEn(segundo).subtitulo : "Fin de la presentación."}
+            </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={iniciarPresentacion} className="instrumento rounded-md bg-ambar-vivo px-3 py-1.5 font-semibold text-noche hover:bg-[#ffb94d]">Reiniciar</button>
+              <button type="button" onClick={detenerPresentacion} className="rounded-md border border-calle px-3 py-1.5 hover:border-hueso">Cerrar</button>
+            </div>
+            <div className="h-1 w-full rounded bg-calle" aria-hidden>
+              <div className="h-1 rounded bg-ambar-vivo" style={{ width: `${(segundo / DURACION) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -343,6 +431,7 @@ function Ficha(props: {
   onCopiar: (texto: string) => void;
   onContacto: (id: string, accion: "enviado" | "no-contactar") => void;
   onPresupuesto: (p: VistaProspecto) => void;
+  foco: Foco | null;
 }) {
   const { p } = props;
   const n = p.negocio;
@@ -376,7 +465,7 @@ function Ficha(props: {
         </div>
       </dl>
 
-      <section aria-labelledby="titulo-motivos">
+      <section id="foco-motivos" aria-labelledby="titulo-motivos" className={props.foco === "motivos" ? "foco-guion" : ""}>
         <h3 id="titulo-motivos" className="instrumento text-lg">Por qué es una oportunidad</h3>
         <ul className="mt-3 space-y-3">
           {p.puntuacion.motivos.map((m) => (
@@ -398,7 +487,7 @@ function Ficha(props: {
         <span className="sr-only"> (se abre en otra pestaña)</span>
       </a>
 
-      <section aria-labelledby="titulo-mensaje">
+      <section id="foco-mensaje" aria-labelledby="titulo-mensaje" className={props.foco === "mensaje" ? "foco-guion" : ""}>
         <div className="flex items-center justify-between">
           <h3 id="titulo-mensaje" className="instrumento text-lg">Mensaje de WhatsApp</h3>
           <button type="button" onClick={() => props.onCopiar(p.mensaje.texto)} className="text-sm font-medium text-ambar-vivo underline-offset-4 hover:underline">
@@ -431,9 +520,11 @@ function Ficha(props: {
         )}
       </div>
 
-      <button type="button" onClick={() => props.onPresupuesto(p)} className="text-sm font-medium text-niebla underline underline-offset-4 hover:text-hueso">
+      <button id="foco-presupuesto" type="button" onClick={() => props.onPresupuesto(p)} className={`${props.foco === "presupuesto" ? "foco-guion" : ""} text-sm font-medium text-niebla underline underline-offset-4 hover:text-hueso`}>
         Descargar datos para el presupuesto (JSON)
       </button>
+      {/* Espacio para que la barra de subtítulos no tape el final en el modo presentación. */}
+      {props.foco && <div aria-hidden className="h-28" />}
     </article>
   );
 }
