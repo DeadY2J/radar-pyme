@@ -82,3 +82,9 @@ Límites honestos de esta pasada: axe solo cubre la vista inicial (no todos los 
 (no en Vercel ni con Lighthouse) y no hubo prueba en móviles físicos.
 
 **Pendiente que no se puede dar por bueno sin cuentas reales:** Google Places con `GOOGLE_PLACES_API_KEY` y `RADAR_TOKEN` reales (Jorge aún no tiene la clave), y persistir la lista de no contactar (Supabase).
+
+## Cambio del 28/11/2026 (modo presentación)
+- `/demo/[id]` admite marcos solo del propio origen (`frame-ancestors 'self'` y `X-Frame-Options: SAMEORIGIN`) para que el
+  modo presentación la muestre dentro de la herramienta. Ningún otro sitio puede enmarcarla; el resto de páginas sigue con
+  `frame-ancestors 'none'` y `DENY`. Riesgo bajo: es una página pública sin acciones.
+- `POST /api/demo/reiniciar` solo existe en modo demo (404 en modo real) y tiene límite de peticiones.

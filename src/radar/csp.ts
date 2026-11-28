@@ -7,7 +7,8 @@
  *    El riesgo de estilos en línea es bajo frente al de scripts.
  *  - Todo lo demás, solo el propio origen (más data:/blob: para imágenes y audio generados en el navegador).
  */
-export function politicaCSP(nonce: string, desarrollo = false): string {
+/** `enmarcable`: solo para la demo por negocio, que el modo presentación muestra en un marco del propio origen. */
+export function politicaCSP(nonce: string, desarrollo = false, opciones: { enmarcable?: boolean } = {}): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${desarrollo ? " 'unsafe-eval'" : ""}`,
@@ -19,7 +20,7 @@ export function politicaCSP(nonce: string, desarrollo = false): string {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    opciones.enmarcable ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
     ...(desarrollo ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
 }

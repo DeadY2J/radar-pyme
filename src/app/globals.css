@@ -15,6 +15,19 @@
   --color-alerta: #a8431f;
   --color-ambar: #855b00;
   --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radar (la herramienta): noche de plano y ámbar de sonar. */
+  --color-noche: #0d1512;
+  --color-manzana: #16221d;
+  --color-calle: #24332c;
+  --color-hueso: #ece6d6;
+  --color-niebla: #9fb0a7;
+  --color-ambar-vivo: #f5a524;
+  --color-ambar-hondo: #b8741a;
+  --color-apagado: #6c8a80;
+  --color-coral: #ff8f6b;
+  --font-instrumento: var(--font-oxanium), ui-sans-serif, system-ui, sans-serif;
+  --font-cuerpo: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
 }
 
 html { background: var(--color-papel); color: var(--color-tinta); }
@@ -38,3 +51,70 @@ h1, h2 { font-variation-settings: "opsz" 48; }
 @media (prefers-reduced-motion: reduce) {
   .barrido { animation: none; }
 }
+
+/* ───────── La herramienta (portada): el sonar sobre el barrio ───────── */
+.radar-app {
+  background: var(--color-noche);
+  color: var(--color-hueso);
+  font-family: var(--font-cuerpo);
+  min-height: 100vh;
+}
+.radar-app :focus-visible { outline: 2px solid var(--color-ambar-vivo); outline-offset: 3px; }
+.instrumento { font-family: var(--font-instrumento); font-feature-settings: "tnum"; }
+
+.control {
+  background: var(--color-manzana);
+  border: 1px solid var(--color-calle);
+  color: var(--color-hueso);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+}
+.control:hover { border-color: var(--color-ambar-hondo); }
+
+/* El disco del radar. */
+.sonar { position: relative; aspect-ratio: 1; width: 100%; border-radius: 50%; overflow: hidden; isolation: isolate; }
+.sonar-haz {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none; z-index: 1;
+  background: conic-gradient(from 0deg, transparent 0deg 290deg, rgb(245 165 36 / 0.04) 300deg, rgb(245 165 36 / 0.32) 359deg, rgb(255 210 130 / 0.7) 360deg);
+  animation: barrido var(--periodo, 4s) linear infinite;
+}
+.sonar-haz.buscando { animation-duration: 1.1s; }
+
+.eco {
+  position: absolute; z-index: 2; translate: -50% -50%;
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 50%; cursor: pointer; background: transparent;
+  animation: aparecer 0.6s ease-out both; animation-delay: var(--retardo, 0s);
+}
+.eco-punto { border-radius: 50%; background: var(--tono); box-shadow: 0 0 10px 1px var(--tono); transition: transform 0.2s; }
+.eco::after {
+  content: ""; position: absolute; inset: 6px; border-radius: 50%; border: 1.5px solid var(--tono); opacity: 0;
+  animation: ping var(--periodo, 4s) ease-out infinite; animation-delay: var(--retardo, 0s);
+}
+.eco:hover .eco-punto, .eco[aria-pressed="true"] .eco-punto { transform: scale(1.35); }
+.eco[aria-pressed="true"]::before {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1px dashed var(--color-ambar-vivo);
+}
+.eco-rotulo {
+  position: absolute; left: calc(100% + 2px); top: 50%; translate: 0 -50%; white-space: nowrap;
+  font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px;
+  background: rgb(13 21 18 / 0.85); color: var(--color-hueso); opacity: 0; pointer-events: none;
+}
+.eco:hover .eco-rotulo, .eco:focus-visible .eco-rotulo, .eco[aria-pressed="true"] .eco-rotulo { opacity: 1; }
+
+@keyframes aparecer { from { opacity: 0; scale: 0.2; } to { opacity: 1; scale: 1; } }
+@keyframes ping { 0% { opacity: 0.9; scale: 0.6; } 35% { opacity: 0; scale: 2.6; } 100% { opacity: 0; scale: 2.6; } }
+
+.barra-motivo { height: 4px; background: var(--color-calle); border-radius: 2px; }
+.barra-motivo > span { display: block; height: 100%; background: var(--color-ambar-vivo); border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sonar-haz, .sonar-haz.buscando { animation: none; transform: rotate(40deg); }
+  .eco, .eco::after { animation: none; }
+  .eco-punto { transition: none; }
+}
+
+/* Modo presentación: lo que está contando la voz en off. */
+.foco-guion { outline: 2px solid var(--color-ambar-vivo); outline-offset: 8px; border-radius: 6px; animation: latido 1.6s ease-in-out infinite; }
+@keyframes latido { 50% { outline-color: rgb(245 165 36 / 0.35); } }
+@media (prefers-reduced-motion: reduce) { .foco-guion { animation: none; } }

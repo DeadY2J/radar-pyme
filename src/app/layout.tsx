@@ -17,6 +17,21 @@ const cifras = localFont({
   display: "swap",
 });
 
+// Oxanium (OFL): lectura de instrumento para cifras y títulos de la herramienta.
+const instrumento = localFont({
+  src: "./fuentes/oxanium-latin-wght-normal.woff2",
+  variable: "--font-oxanium",
+  weight: "200 800",
+  display: "swap",
+});
+// Instrument Sans (OFL): texto corrido de la herramienta.
+const cuerpo = localFont({
+  src: "./fuentes/instrument-sans-latin-wght-normal.woff2",
+  variable: "--font-instrument",
+  weight: "400 700",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Radar Pyme",
   description: "Encuentra pymes con poca presencia digital y prepara una demo personalizada y un mensaje de WhatsApp uno a uno para cada una.",
@@ -27,7 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Render dinámico: la CSP lleva un nonce nuevo en cada petición (ver src/proxy.ts).
   await connection();
   return (
-    <html lang="es" className={`${texto.variable} ${cifras.variable}`}>
+    <html lang="es" className={`${texto.variable} ${cifras.variable} ${instrumento.variable} ${cuerpo.variable}`}>
       <body>{children}</body>
     </html>
   );
