@@ -2,6 +2,12 @@
 
 Revisión del 27/11/2026.
 
+## Revisión del 28/11/2026 (auditoría fase 4)
+- CSP completa con nonce por petición (`src/proxy.ts`), verificada en navegador sin errores.
+- Typecheck, 56 tests, build y `npm audit` (0 vulnerabilidades) en verde; axe sin incidencias en la vista inicial; sin desbordamiento a 375 px.
+- Pendiente con cuentas reales (no se da por bueno): Google Places con `GOOGLE_PLACES_API_KEY` y `RADAR_TOKEN` reales (Jorge aún no tiene la clave), y persistir la lista de no contactar (Supabase).
+- Detalle en `AUDITORIA.md`. No desplegado.
+
 ## Hecho
 - Prospección en modo demo sin clave de Google: busca negocios ficticios por sector y ciudad, puntúa su presencia digital
   (sin inventar datos), genera una demo personalizada por negocio y un mensaje de WhatsApp uno a uno para enviar a mano.
@@ -16,7 +22,7 @@ Revisión del 27/11/2026.
 - Probar una búsqueda real con `GOOGLE_PLACES_API_KEY` y definir `RADAR_TOKEN` (el modo real queda cerrado sin él).
 - Supabase para contactos y lista de no contactar (hoy en memoria).
 - Generador del presupuesto en PDF que consuma `EntradaPresupuesto`.
-- CSP completa con nonces (ver AUDITORIA.md). No desplegado.
+- Límite de peticiones compartido antes de producción (ver AUDITORIA.md). No desplegado.
 
 ## Cómo probarlo
 ```bash
